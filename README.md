@@ -31,23 +31,49 @@ Visit http://localhost:3000. The database lives at `./data/app.db`.
 
 ## Deploy to Railway
 
+Railway is the easiest path because Railway volumes persist a SQLite file across deploys.
+
 1. Push this repo to GitHub.
 2. In Railway, create a new project from this GitHub repo.
 3. Add a **Volume** mounted at `/data`. This persists your SQLite database across deploys.
 4. Set these environment variables in Railway:
-   - `DATABASE_URL=/data/app.db`
-   - `APP_PASSWORD=your-access-code` (optional but recommended)
-5. Railway auto-detects the Dockerfile and builds. First deploy runs migrations automatically.
+   - `DATABASE_URL=file:/data/app.db`
+   - `APP_PASSWORD=your-access-code`
+5. Railway auto-detects the Dockerfile and builds. First boot runs migrations automatically.
 
-Open the generated URL. If you set `APP_PASSWORD`, enter it on first visit.
+Open the generated URL and log in with `APP_PASSWORD`.
+
+## Deploy to Vercel
+
+Vercel functions run on a read-only, ephemeral filesystem, so the database has to live remotely. Use **Turso** (hosted libsql, free tier covers this).
+
+1. Create a Turso database:
+   ```bash
+   turso db create senior-assassin
+   turso db show senior-assassin --url       # libsql://...
+   turso db tokens create senior-assassin    # auth token
+   ```
+2. Push the schema to Turso once from your laptop:
+   ```bash
+   DATABASE_URL="libsql://your-db-name-xxx.turso.io" \
+   DATABASE_AUTH_TOKEN="your-token" \
+   npx drizzle-kit push
+   ```
+3. Push this repo to GitHub.
+4. In Vercel, import the GitHub repo. Framework auto-detects as Next.js.
+5. Set the same three env vars on Vercel (`DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `APP_PASSWORD`).
+6. Deploy. Subsequent schema changes: re-run step 2 locally.
+
+The repo ships with `vercel.json` pinning `npm install --legacy-peer-deps` so the install resolves cleanly.
 
 ## Environment variables
 
-| Var            | Required | Description                                                                      |
-| -------------- | -------- | -------------------------------------------------------------------------------- |
-| `DATABASE_URL` | yes      | Path to SQLite file. Default `./data/app.db` locally, `/data/app.db` on Railway. |
-| `APP_PASSWORD` | no       | Single shared password. If unset, the app is open to anyone with the URL.        |
-| `PORT`         | no       | Railway sets this. Default 3000.                                                 |
+| Var                   | Required        | Description                                                                                                                  |
+| --------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`        | yes             | `file:/data/app.db` for Railway or local. `libsql://...` for Vercel + Turso. Defaults to `file:./data/app.db` for local dev. |
+| `DATABASE_AUTH_TOKEN` | only with Turso | Token from `turso db tokens create`. Leave unset when using a local file.                                                    |
+| `APP_PASSWORD`        | yes in prod     | Single shared password. If unset, the app is open to anyone with the URL.                                                    |
+| `PORT`                | no              | Railway sets this. Vercel ignores it. Default 3000.                                                                          |
 
 ## Data model
 
