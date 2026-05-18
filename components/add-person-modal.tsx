@@ -68,7 +68,7 @@ export function AddPersonModal({
         Add {defaultRole === "target" ? "Target" : "Person"}
       </Button>
       {open && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 md:pl-[17rem]">
           <div className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800">
               <div>
@@ -86,8 +86,11 @@ export function AddPersonModal({
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <form onSubmit={submit} className="overflow-y-auto p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+            <form
+              onSubmit={submit}
+              className="overflow-y-auto p-4 sm:p-5 space-y-4"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Name</Label>
                   <Input
@@ -111,7 +114,7 @@ export function AddPersonModal({
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <Label>Status</Label>
                   <Select
@@ -170,7 +173,7 @@ export function AddPersonModal({
                   placeholder="123 Main St, Anytown"
                 />
               </div>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
                   <Label>Make</Label>
                   <Input
@@ -212,7 +215,7 @@ export function AddPersonModal({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Workplace</Label>
                   <Input
