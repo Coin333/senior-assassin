@@ -14,6 +14,7 @@ type Pin = {
   type: string;
   personId: string | null;
   personName: string | null;
+  side: string | null;
   observedAt: Date | null;
   createdAt: Date | null;
 };

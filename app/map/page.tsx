@@ -11,21 +11,25 @@ export default async function MapPage() {
     .from(schema.locations)
     .orderBy(desc(schema.locations.createdAt));
   const people = await db.select().from(schema.people);
-  const peopleMap = new Map(people.map((p) => [p.id, p.name]));
+  const peopleMap = new Map(people.map((p) => [p.id, p]));
 
   const pins = locations
     .filter((l) => l.lat !== null && l.lng !== null)
-    .map((l) => ({
-      id: l.id,
-      name: l.name,
-      lat: l.lat as number,
-      lng: l.lng as number,
-      type: l.type,
-      personId: l.personId,
-      personName: l.personId ? (peopleMap.get(l.personId) ?? null) : null,
-      observedAt: l.observedAt,
-      createdAt: l.createdAt,
-    }));
+    .map((l) => {
+      const person = l.personId ? peopleMap.get(l.personId) : null;
+      return {
+        id: l.id,
+        name: l.name,
+        lat: l.lat as number,
+        lng: l.lng as number,
+        type: l.type,
+        personId: l.personId,
+        personName: person?.name ?? null,
+        side: person?.side ?? null,
+        observedAt: l.observedAt,
+        createdAt: l.createdAt,
+      };
+    });
 
   const typeCounts = pins.reduce<Record<string, number>>((acc, p) => {
     acc[p.type] = (acc[p.type] || 0) + 1;

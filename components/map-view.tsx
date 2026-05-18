@@ -30,6 +30,7 @@ type LocPin = {
   type: string;
   personId: string | null;
   personName: string | null;
+  side?: string | null;
 };
 
 const TYPE_COLOR: Record<string, string> = {
@@ -42,6 +43,14 @@ const TYPE_COLOR: Record<string, string> = {
   snap_check: "#f43f5e",
   safe_zone: "#22c55e",
 };
+
+// Side overrides type color so the alliance read is dominant.
+function pinColor(p: LocPin) {
+  if (p.type === "safe_zone") return "#22c55e";
+  if (p.side === "mine") return "#3b82f6";
+  if (p.side === "target") return "#f97316";
+  return TYPE_COLOR[p.type] || "#71717a";
+}
 
 export function MapView({ pins, filter }: { pins: LocPin[]; filter: string }) {
   const [mounted, setMounted] = useState(false);
@@ -91,9 +100,9 @@ export function MapView({ pins, filter }: { pins: LocPin[]; filter: string }) {
             center={[p.lat, p.lng]}
             radius={9}
             pathOptions={{
-              color: TYPE_COLOR[p.type] || "#71717a",
-              fillColor: TYPE_COLOR[p.type] || "#71717a",
-              fillOpacity: 0.45,
+              color: pinColor(p),
+              fillColor: pinColor(p),
+              fillOpacity: 0.5,
               weight: 2,
             }}
           >

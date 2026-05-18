@@ -18,15 +18,29 @@ export async function GET(req: Request) {
   return NextResponse.json({ data: rows });
 }
 
+function inferSide(role: string, requested?: string) {
+  if (requested) return requested;
+  if (role === "target") return "target";
+  if (role === "ally") return "mine";
+  return "neutral";
+}
+
 export async function POST(req: Request) {
   const body = await req.json();
   if (!body?.name)
     return NextResponse.json({ error: "name required" }, { status: 400 });
+
+  const role = body.role ?? "neutral";
+  const side = inferSide(role, body.side);
+
   const [row] = await db
     .insert(schema.people)
     .values({
       name: body.name,
-      role: body.role ?? "person",
+      role,
+      side,
+      associatedTargetId: body.associatedTargetId ?? null,
+      relationshipToTarget: body.relationshipToTarget ?? null,
       status: body.status ?? "alive",
       threatLevel: body.threatLevel ?? "medium",
       photoUrl: body.photoUrl,
@@ -60,7 +74,21 @@ export async function POST(req: Request) {
     })
     .returning();
 
-  if (body.role === "target" && (body.lat || body.address)) {
+  // Auto-create a relationship row when person is linked to a target.
+  if (body.associatedTargetId && body.relationshipToTarget) {
+    try {
+      await db.insert(schema.relationships).values({
+        fromPersonId: body.associatedTargetId,
+        toPersonId: row.id,
+        type: body.relationshipToTarget,
+        strength: 6,
+      });
+    } catch {
+      // Silent skip if target id was invalid.
+    }
+  }
+
+  if (role === "target" && (body.lat || body.address)) {
     await db.insert(schema.locations).values({
       name: `${row.name} - Home`,
       lat: body.lat,

@@ -8,6 +8,7 @@ type Person = {
   id: string;
   name: string;
   role: string | null;
+  side: string | null;
   status: string | null;
   threatLevel: string | null;
   photoUrl: string | null;
@@ -22,22 +23,50 @@ type Rel = {
 type Node = Person & d3.SimulationNodeDatum & { degree?: number };
 type Link = { source: string | Node; target: string | Node; type: string };
 
-const ROLE_COLOR: Record<string, string> = {
-  target: "#ef4444",
-  asset: "#10b981",
-  friend: "#6366f1",
-  family: "#a78bfa",
-  person: "#71717a",
+// Side trumps role for color. Target itself is the darkest red.
+const SIDE_COLOR: Record<string, string> = {
+  mine: "#3b82f6", // blue - your team
+  target: "#f97316", // orange - target's team / target-adjacent
+  neutral: "#71717a",
 };
 
-const REL_COLOR: Record<string, string> = {
-  friend: "rgba(99,102,241,0.45)",
-  romantic: "rgba(244,114,182,0.6)",
-  family: "rgba(167,139,250,0.45)",
-  coworker: "rgba(125,211,252,0.45)",
-  teammate: "rgba(252,211,77,0.45)",
-  rival: "rgba(239,68,68,0.55)",
-};
+function nodeColorFor(p: {
+  role: string | null;
+  side: string | null;
+  status: string | null;
+}) {
+  if (p.role === "target") {
+    return p.status === "eliminated_me" ? "#52525b" : "#ef4444";
+  }
+  return SIDE_COLOR[p.side ?? "neutral"] ?? "#71717a";
+}
+
+// Edges between same-side people stand out so the alliance is visible.
+function linkColorFor(
+  rel: { type: string },
+  source: Person | undefined,
+  target: Person | undefined,
+) {
+  if (source && target && source.side && source.side === target.side) {
+    if (source.side === "mine") return "rgba(59,130,246,0.55)";
+    if (source.side === "target") return "rgba(249,115,22,0.55)";
+  }
+  switch (rel.type) {
+    case "romantic":
+      return "rgba(244,114,182,0.6)";
+    case "family":
+      return "rgba(167,139,250,0.55)";
+    case "coworker":
+      return "rgba(125,211,252,0.45)";
+    case "teammate":
+      return "rgba(252,211,77,0.45)";
+    case "rival":
+    case "enemy":
+      return "rgba(239,68,68,0.55)";
+    default:
+      return "rgba(113,113,122,0.4)";
+  }
+}
 
 export function NetworkGraph({
   people,
@@ -123,9 +152,12 @@ export function NetworkGraph({
     return 18 + Math.min(8, (n.degree || 0) * 1.5);
   }
   function nodeColor(n: Node) {
-    if (n.role === "target" && n.status === "eliminated_me") return "#52525b";
-    return ROLE_COLOR[n.role || "person"] || "#71717a";
+    return nodeColorFor(n);
   }
+  const peopleById = useMemo(
+    () => new Map(people.map((p) => [p.id, p])),
+    [people],
+  );
 
   function dragHandlers(n: Node) {
     let dragging = false;
@@ -170,6 +202,13 @@ export function NetworkGraph({
             const s = l.source as Node;
             const t = l.target as Node;
             if (s.x === undefined || t.x === undefined) return null;
+            const sourcePerson = peopleById.get(s.id);
+            const targetPerson = peopleById.get(t.id);
+            const sameSide =
+              sourcePerson &&
+              targetPerson &&
+              sourcePerson.side &&
+              sourcePerson.side === targetPerson.side;
             return (
               <line
                 key={i}
@@ -177,8 +216,9 @@ export function NetworkGraph({
                 y1={s.y}
                 x2={t.x}
                 y2={t.y}
-                stroke={REL_COLOR[l.type] || "rgba(113,113,122,0.3)"}
-                strokeWidth={1.5}
+                stroke={linkColorFor(l, sourcePerson, targetPerson)}
+                strokeWidth={sameSide ? 2 : 1.4}
+                strokeDasharray={sameSide ? undefined : "4 2"}
               />
             );
           })}
@@ -245,14 +285,22 @@ export function NetworkGraph({
       </svg>
 
       <div className="absolute bottom-3 left-3 flex flex-wrap gap-3 px-3 py-2 bg-zinc-950/80 backdrop-blur border border-zinc-800 rounded-md">
-        {Object.entries(ROLE_COLOR).map(([role, color]) => (
-          <div key={role} className="flex items-center gap-1.5">
+        {[
+          { color: "#ef4444", label: "Target" },
+          { color: SIDE_COLOR.mine, label: "Your team" },
+          { color: SIDE_COLOR.target, label: "Target's team" },
+          { color: SIDE_COLOR.neutral, label: "Neutral" },
+        ].map((entry) => (
+          <div key={entry.label} className="flex items-center gap-1.5">
             <span
               className="w-2.5 h-2.5 rounded-full border"
-              style={{ borderColor: color, background: `${color}30` }}
+              style={{
+                borderColor: entry.color,
+                background: `${entry.color}30`,
+              }}
             />
             <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
-              {role}
+              {entry.label}
             </span>
           </div>
         ))}

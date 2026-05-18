@@ -9,6 +9,7 @@ type Person = {
   id: string;
   name: string;
   role: string | null;
+  side: string | null;
   status: string | null;
   threatLevel: string | null;
   photoUrl: string | null;
@@ -21,12 +22,34 @@ type Rel = {
   type: string;
 };
 
-const TABS = [
-  { value: "all", label: "All" },
-  { value: "target", label: "Targets" },
-  { value: "asset", label: "Assets" },
-  { value: "friend", label: "Friends" },
-  { value: "family", label: "Family" },
+const TABS: {
+  value: string;
+  label: string;
+  predicate: (p: Person) => boolean;
+}[] = [
+  { value: "all", label: "All", predicate: () => true },
+  { value: "target", label: "Targets", predicate: (p) => p.role === "target" },
+  { value: "mine", label: "My team", predicate: (p) => p.side === "mine" },
+  {
+    value: "target_side",
+    label: "Target's team",
+    predicate: (p) => p.side === "target" && p.role !== "target",
+  },
+  {
+    value: "family",
+    label: "Family",
+    predicate: (p) => p.role === "family",
+  },
+  {
+    value: "friend",
+    label: "Friends",
+    predicate: (p) => p.role === "friend",
+  },
+  {
+    value: "neutral",
+    label: "Neutral",
+    predicate: (p) => p.side === "neutral" && p.role !== "target",
+  },
 ];
 
 export function NetworkView({
@@ -39,14 +62,11 @@ export function NetworkView({
   const [filter, setFilter] = useState("all");
   const [focusedId, setFocusedId] = useState<string | null>(null);
 
-  const filtered =
-    filter === "all" ? people : people.filter((p) => p.role === filter);
+  const activeTab = TABS.find((t) => t.value === filter) ?? TABS[0];
+  const filtered = people.filter(activeTab.predicate);
   const counts = TABS.reduce(
     (acc, t) => {
-      acc[t.value] =
-        t.value === "all"
-          ? people.length
-          : people.filter((p) => p.role === t.value).length;
+      acc[t.value] = people.filter(t.predicate).length;
       return acc;
     },
     {} as Record<string, number>,

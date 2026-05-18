@@ -23,6 +23,7 @@ export default async function NetworkPage() {
             id: p.id,
             name: p.name,
             role: p.role,
+            side: p.side,
             status: p.status,
             threatLevel: p.threatLevel,
             photoUrl: p.photoUrl,

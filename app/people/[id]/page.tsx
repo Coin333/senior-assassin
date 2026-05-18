@@ -20,6 +20,8 @@ import {
   ScheduleGrid,
   DeletePersonButton,
   AddRelationshipForm,
+  SocialMediaEditor,
+  AllegianceEditor,
 } from "@/components/person-actions";
 import { timeAgo } from "@/lib/utils";
 import {
@@ -210,42 +212,36 @@ export default async function PersonDetailPage({
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <Card>
-            <CardHeader title="Socials" />
-            <div className="p-4 space-y-1.5">
-              <SocialRow
-                icon={MessageCircle}
-                label="Snapchat"
-                handle={person.snapchatHandle}
-                active={!!person.snapMapVisible}
+          <div className="space-y-5">
+            <Card>
+              <CardHeader title="Allegiance" />
+              <AllegianceEditor
+                id={person.id}
+                side={person.side}
+                role={person.role}
+                associatedTargetId={person.associatedTargetId}
+                relationshipToTarget={person.relationshipToTarget}
+                targets={allPeople
+                  .filter((p) => p.role === "target" && p.id !== person.id)
+                  .map((p) => ({ id: p.id, name: p.name }))}
               />
-              <SocialRow
-                icon={Instagram}
-                label="Instagram"
-                handle={person.instagramHandle}
+            </Card>
+            <Card>
+              <CardHeader title="Socials" />
+              <SocialMediaEditor
+                id={person.id}
+                values={{
+                  snapchatHandle: person.snapchatHandle,
+                  instagramHandle: person.instagramHandle,
+                  tiktokHandle: person.tiktokHandle,
+                  beRealHandle: person.beRealHandle,
+                  stravaHandle: person.stravaHandle,
+                  spotifyHandle: person.spotifyHandle,
+                  venmoHandle: person.venmoHandle,
+                }}
               />
-              <SocialRow
-                icon={Camera}
-                label="BeReal"
-                handle={person.beRealHandle}
-              />
-              <SocialRow
-                icon={Music2}
-                label="Spotify"
-                handle={person.spotifyHandle}
-              />
-              <SocialRow
-                icon={Heart}
-                label="Strava"
-                handle={person.stravaHandle}
-              />
-              <SocialRow
-                icon={Camera}
-                label="TikTok"
-                handle={person.tiktokHandle}
-              />
-            </div>
-          </Card>
+            </Card>
+          </div>
 
           <Card className="lg:col-span-2">
             <CardHeader

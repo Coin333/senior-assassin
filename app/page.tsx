@@ -12,6 +12,8 @@ import {
 } from "@/components/ui";
 import { timeAgo } from "@/lib/utils";
 import { AlertTriangle, Crosshair, Eye, Radio, Swords } from "lucide-react";
+import { AddPersonModal } from "@/components/add-person-modal";
+import { HomeQuickActions } from "@/components/quick-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -85,17 +87,15 @@ export default async function Dashboard() {
             ? `Active contract: ${current.name}. Stay invisible. Strike when the seam opens.`
             : "No active target assigned. Add a target to begin operations."
         }
-        action={
-          <Link
-            href="/targets"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-md bg-red-500/15 border border-red-500/40 text-red-300 hover:bg-red-500/25 cursor-pointer transition-all"
-          >
-            <Crosshair className="w-4 h-4" />
-            Open Targets
-          </Link>
-        }
+        action={<AddPersonModal defaultRole="target" />}
       />
       <PageBody className="space-y-6">
+        <HomeQuickActions
+          targets={d.allPeople
+            .filter((p) => p.role === "target")
+            .map((t) => ({ id: t.id, name: t.name }))}
+          recentTargets={d.alive.map((t) => ({ id: t.id, name: t.name }))}
+        />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card>
             <Stat

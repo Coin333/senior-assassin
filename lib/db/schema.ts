@@ -7,7 +7,14 @@ export const people = sqliteTable("people", {
     .$defaultFn(() => createId()),
   name: text("name").notNull(),
   photoUrl: text("photo_url"),
-  role: text("role").notNull().default("person"),
+  // What kind of person they are: target, ally, family, friend, romantic, coworker, teammate, neutral
+  role: text("role").notNull().default("neutral"),
+  // Whose team they're on: mine (your side), target (target's side), neutral
+  side: text("side").notNull().default("neutral"),
+  // If side === "target", which target they're connected to (FK to people.id with role=target)
+  associatedTargetId: text("associated_target_id"),
+  // How they relate to the associated target: friend, family, romantic, coworker, teammate, other
+  relationshipToTarget: text("relationship_to_target"),
   status: text("status").default("alive"),
   threatLevel: text("threat_level").default("medium"),
   phone: text("phone"),
