@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   Skull,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,17 @@ const NAV = [
 export function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function signOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      await fetch("/api/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/login";
+    }
+  }
 
   return (
     <>
@@ -100,8 +112,16 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="px-4 py-3 border-t border-zinc-800/60">
-          <div className="flex items-center gap-2">
+        <div className="px-3 py-3 border-t border-zinc-800/60 space-y-2">
+          <button
+            onClick={signOut}
+            disabled={signingOut}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium tracking-tight text-zinc-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer disabled:opacity-50"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            {signingOut ? "Signing out..." : "Sign out"}
+          </button>
+          <div className="flex items-center gap-2 px-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[10px] font-mono tracking-widest text-zinc-500">
               OPERATIONAL

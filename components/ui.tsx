@@ -19,7 +19,7 @@ export function PageHeader({
   meta?: ReactNode;
 }) {
   return (
-    <div className="px-6 md:px-10 pt-8 pb-6 border-b border-zinc-800/60">
+    <div className="relative z-20 px-6 md:px-10 pt-8 pb-6 border-b border-zinc-800/60 bg-zinc-950">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           {meta && (
@@ -34,7 +34,9 @@ export function PageHeader({
             <p className="mt-1.5 text-sm text-zinc-400 max-w-2xl">{subtitle}</p>
           )}
         </div>
-        {action && <div className="flex items-center gap-2">{action}</div>}
+        {action && (
+          <div className="relative z-30 flex items-center gap-2">{action}</div>
+        )}
       </div>
     </div>
   );

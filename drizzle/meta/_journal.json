@@ -8,6 +8,13 @@
       "when": 1779081989990,
       "tag": "0000_dear_salo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1779118697407,
+      "tag": "0001_daily_thunderbolt",
+      "breakpoints": true
     }
   ]
 }

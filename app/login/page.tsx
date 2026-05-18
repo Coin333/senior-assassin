@@ -1,26 +1,43 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Skull } from "lucide-react";
+import { Skull, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!password) {
+      setErr("Enter your access code.");
+      return;
+    }
     setLoading(true);
     setErr("");
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    setLoading(false);
-    if (res.ok) router.push("/");
-    else setErr("Invalid credentials");
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      if (res.ok) {
+        window.location.href = "/";
+        return;
+      }
+      if (res.status === 401) setErr("Wrong access code. Try again.");
+      else setErr("Login failed. Check your connection and retry.");
+      setLoading(false);
+    } catch {
+      setErr("Network error. Check your connection.");
+      setLoading(false);
+    }
+  }
+
+  function onChange(value: string) {
+    setPassword(value);
+    if (err) setErr("");
   }
 
   return (
@@ -42,21 +59,49 @@ export default function LoginPage() {
           onSubmit={submit}
           className="space-y-3 bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 backdrop-blur"
         >
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Access code"
-            autoFocus
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50"
-          />
-          {err && <div className="text-xs text-red-400 font-mono">{err}</div>}
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="Access code"
+              autoFocus
+              aria-invalid={!!err}
+              aria-describedby={err ? "login-error" : undefined}
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-md pl-3 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              tabIndex={-1}
+              className="absolute inset-y-0 right-0 px-3 flex items-center text-zinc-500 hover:text-zinc-300 cursor-pointer"
+            >
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+          {err && (
+            <div
+              id="login-error"
+              role="alert"
+              className="text-xs text-red-400 font-mono"
+            >
+              {err}
+            </div>
+          )}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-red-500/15 border border-red-500/40 text-red-300 hover:bg-red-500/25 hover:border-red-500/60 rounded-md py-2.5 text-sm font-semibold cursor-pointer transition-all disabled:opacity-50"
+            disabled={loading || !password}
+            className="w-full inline-flex items-center justify-center gap-2 bg-red-500/15 border border-red-500/40 text-red-300 hover:bg-red-500/25 hover:border-red-500/60 rounded-md py-2.5 text-sm font-semibold cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Verifying..." : "Enter Command"}
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {loading ? "Verifying" : "Enter Command"}
           </button>
         </form>
       </div>

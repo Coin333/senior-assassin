@@ -77,6 +77,20 @@ export function AddPersonModal({
       .catch(() => setTargets([]));
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
   // Auto-sync side when role changes
   function setRole(role: string) {
     setForm((f) => ({
@@ -120,12 +134,21 @@ export function AddPersonModal({
 
   return (
     <>
-      <Button onClick={() => setOpen(true)} variant="primary">
+      <Button
+        onClick={() => setOpen(true)}
+        variant="primary"
+        className="relative z-30"
+      >
         <Plus className="w-3.5 h-3.5" />
         Add {defaultRole === "target" ? "Target" : "Person"}
       </Button>
       {open && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 md:pl-[17rem]">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setOpen(false);
+          }}
+          className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 md:pl-[17rem]"
+        >
           <div className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800">
               <div>

@@ -20,6 +20,21 @@ export function timeAgo(date: Date | string | number | null | undefined) {
   return d.toLocaleDateString();
 }
 
+export function statusLabel(status: string | null | undefined) {
+  switch (status) {
+    case "alive":
+      return "alive";
+    case "eliminated":
+      return "eliminated";
+    case "eliminated_me":
+      return "eliminated by me";
+    case "assigned":
+      return "assigned";
+    default:
+      return status ? status.replace(/_/g, " ") : "unknown";
+  }
+}
+
 export function statusColor(status: string | null | undefined) {
   switch (status) {
     case "alive":

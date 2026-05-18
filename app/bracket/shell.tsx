@@ -14,7 +14,7 @@ import {
   Textarea,
 } from "@/components/ui";
 import { Plus, X, Trophy, Trash2 } from "lucide-react";
-import { timeAgo } from "@/lib/utils";
+import { timeAgo, statusLabel } from "@/lib/utils";
 
 type Round = {
   id: string;
@@ -178,7 +178,7 @@ export function BracketShell({
                         {t.name}
                       </div>
                       <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
-                        {t.status?.replace("_", " ")}{" "}
+                        {statusLabel(t.status)}{" "}
                         {t.weekAssigned ? `· w${t.weekAssigned}` : ""}
                       </div>
                     </div>
@@ -236,7 +236,7 @@ function RoundModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 md:pl-[17rem]">
+    <div className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 md:pl-[17rem]">
       <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800">
           <div>

@@ -550,7 +550,7 @@ function NewOpModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 md:pl-[17rem]">
+    <div className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 md:pl-[17rem]">
       <div className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800">
           <div>

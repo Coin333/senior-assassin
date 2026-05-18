@@ -832,21 +832,46 @@ export function ScheduleGrid({
   );
 }
 
-export function DeletePersonButton({ id }: { id: string }) {
+export function DeletePersonButton({
+  id,
+  name,
+}: {
+  id: string;
+  name?: string;
+}) {
   const router = useRouter();
-  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
   async function del() {
-    await fetch(`/api/people/${id}`, { method: "DELETE" });
-    router.push("/targets");
+    const label = name ? `"${name}"` : "this person";
+    if (
+      !confirm(
+        `Delete ${label}? This removes them and all their notes, locations, schedule, photos, and relationships. This cannot be undone.`,
+      )
+    )
+      return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/people/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const body = await res.text();
+        alert(`Delete failed: ${body || res.statusText}`);
+        return;
+      }
+      router.push("/");
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
   }
   return (
     <button
-      onClick={() => (confirming ? del() : setConfirming(true))}
-      onMouseLeave={() => setConfirming(false)}
-      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+      type="button"
+      onClick={del}
+      disabled={busy}
+      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer disabled:opacity-50"
     >
       <Trash2 className="w-3 h-3" />
-      {confirming ? "Confirm delete" : "Delete"}
+      {busy ? "Deleting..." : "Delete"}
     </button>
   );
 }

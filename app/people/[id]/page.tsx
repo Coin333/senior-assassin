@@ -23,7 +23,7 @@ import {
   SocialMediaEditor,
   AllegianceEditor,
 } from "@/components/person-actions";
-import { timeAgo } from "@/lib/utils";
+import { timeAgo, statusLabel } from "@/lib/utils";
 import {
   ArrowLeft,
   Car,
@@ -126,7 +126,7 @@ export default async function PersonDetailPage({
             {isTarget && (
               <StatusButtons id={person.id} status={person.status} />
             )}
-            <DeletePersonButton id={person.id} />
+            <DeletePersonButton id={person.id} name={person.name} />
           </div>
         }
       />
@@ -163,7 +163,7 @@ export default async function PersonDetailPage({
                           : "default"
                     }
                   >
-                    {person.status?.replace("_", " ")}
+                    {statusLabel(person.status)}
                   </Badge>
                 )}
                 {person.weekAssigned && (

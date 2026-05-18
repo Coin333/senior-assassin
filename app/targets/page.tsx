@@ -10,6 +10,7 @@ import {
   PageHeader,
   Empty,
 } from "@/components/ui";
+import { statusLabel } from "@/lib/utils";
 import { AddPersonModal } from "@/components/add-person-modal";
 import { QuickKillToggle } from "@/components/person-actions";
 import { Crosshair } from "lucide-react";
@@ -98,7 +99,7 @@ export default async function TargetsPage() {
                                         : "default"
                                   }
                                 >
-                                  {t.status?.replace("_", " ")}
+                                  {statusLabel(t.status)}
                                 </Badge>
                                 <Badge
                                   variant={
